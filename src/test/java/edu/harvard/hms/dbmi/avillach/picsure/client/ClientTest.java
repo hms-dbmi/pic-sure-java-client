@@ -1,6 +1,5 @@
 package edu.harvard.hms.dbmi.avillach.picsure.client;
 
-import edu.harvard.hms.dbmi.avillach.picsure.client.impl.Client;
 import org.junit.Test;
 
 import java.net.MalformedURLException;
@@ -13,13 +12,13 @@ public class ClientTest {
 
     @Test
     public void testInstantiation() {
-        IClient testClient = new Client();
+        Client testClient = new Client();
         assertNotNull(testClient);
     }
 
     @Test
     public void testConnectionBuilding() {
-        IClient testClient = new Client();
+        Client testClient = new Client();
         URL anyUrl;
 
         // the connection object returned by testObj should implement the IConnection interface
@@ -29,12 +28,12 @@ public class ClientTest {
             fail("The testing url is malformed!");
             return;
         }
-        IConnection conn = testClient.connect(anyUrl, "any.token.value", false);
+        Object conn = testClient.connect(anyUrl, "any.token.value", false);
         Class[] interfaceList = conn.getClass().getInterfaces();
         for (Class iface : interfaceList) {
-            if (iface.getName().equals("edu.harvard.hms.dbmi.avillach.picsure.client.IConnection")) return;
+            if (iface.getName().equals("edu.harvard.hms.dbmi.avillach.picsure.client.IPicSureConnection")) return;
         }
-        fail("returned connection does not implement IConnection class!");
+        fail("returned connection does not implement IPicSureConnection class!");
     }
 
 
