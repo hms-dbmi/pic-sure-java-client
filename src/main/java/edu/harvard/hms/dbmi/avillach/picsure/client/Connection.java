@@ -20,14 +20,22 @@ public final class Connection implements IPicSureConnection {
     }
 
     public String getTOKEN() {
-        return TOKEN;
+        return this.TOKEN;
     }
 
     public URL getENDPOINT() {
-        return ENDPOINT;
+        return this.ENDPOINT;
     }
 
-    public void help() {}                                       // for jShell
+    /**
+     * Class function for use in jShell to print help instructions on the screen for this object's use.
+     * @since   1.0
+     */
+    public void help() {
+        // for jShell
+    }
+
+
     public String about(String resourceId) {
         return null;
     }     // for jShell

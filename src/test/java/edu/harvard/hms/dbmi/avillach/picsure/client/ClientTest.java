@@ -1,5 +1,6 @@
 package edu.harvard.hms.dbmi.avillach.picsure.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import java.net.MalformedURLException;

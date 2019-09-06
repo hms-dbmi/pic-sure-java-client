@@ -4,21 +4,31 @@ import java.net.URL;
 import java.util.UUID;
 
 public abstract class BasePicSureResourceConnection {
-    public final UUID RESOURCE_UUID;
-    public final URL ENDPOINT_URL;
-    public final String TOKEN;
+    private final UUID RESOURCE_UUID;
+    private final URL ENDPOINT_URL;
+    private final String TOKEN;
     protected final IPicSureConnection protectedConnectionObj;
     protected final IPicSureConnectionAPI protectedApiObj;
 
 
-    public BasePicSureResourceConnection(BasePicSureAdapter adapter, UUID resource_uuid) {
-        this.protectedConnectionObj = adapter.getConnection();
-        this.protectedApiObj = adapter.getApiObject();
+    public BasePicSureResourceConnection(IPicSureConnection connection, UUID resource_uuid) {
+        this.protectedConnectionObj = connection;
+        this.protectedApiObj = connection.getApiObject();
         this.RESOURCE_UUID = resource_uuid;
         this.ENDPOINT_URL = this.protectedConnectionObj.getENDPOINT();
         this.TOKEN = this.protectedConnectionObj.getTOKEN();
     }
 
-    public void help() {}               // for jShell
-
+    /**
+     * Class function for use in jShell to print help instructions on the screen for this object's use.
+     * @since   1.0
+     */
+    public void help() {
+        // for jShell
+    }
+    public IPicSureConnection getConnection() { return this.protectedConnectionObj; }
+    public IPicSureConnectionAPI getApiObject() { return this.protectedApiObj; }
+    public UUID getResourceUUID() { return this.RESOURCE_UUID; }
+    public URL getEndpointUrl() { return this.ENDPOINT_URL; }
+    public String getToken() { return this.TOKEN; }
 }

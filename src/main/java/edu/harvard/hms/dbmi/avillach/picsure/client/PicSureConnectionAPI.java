@@ -1,5 +1,8 @@
 package edu.harvard.hms.dbmi.avillach.picsure.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.harvard.dbmi.avillach.data.entity.Resource;
 import edu.harvard.dbmi.avillach.domain.QueryRequest;
 import edu.harvard.dbmi.avillach.domain.QueryStatus;
@@ -16,9 +19,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.net.http.*;
+import java.net.http.HttpRequest.*;
+import java.net.http.HttpResponse.*;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -62,7 +65,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
                     sslContext.init(null, trustAllCerts, new SecureRandom());
                     this.httpClient = HttpClient.newBuilder()
                             .followRedirects(HttpClient.Redirect.NORMAL)
-                            .connectTimeout(Duration.ofMillis(TIMEOUT_SECS * 1000))
+                            .connectTimeout(Duration.ofSeconds(TIMEOUT_SECS))
                             .sslContext(sslContext) // SSL context initialised earlier
                             .build();
                 } catch (KeyManagementException e) {
@@ -74,7 +77,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
         } else {
             this.httpClient = HttpClient.newBuilder()
                     .followRedirects(HttpClient.Redirect.NORMAL)
-                    .connectTimeout(Duration.ofMillis(TIMEOUT_SECS * 1000))
+                    .connectTimeout(Duration.ofSeconds(TIMEOUT_SECS))
                     .build();
         }
     }
@@ -82,23 +85,38 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
 
     @Override
     public ResourceInfo resourceInfo(UUID resourceId, QueryRequest credentialsQueryRequest) {
-        // @Path("/info/{resourceId}")
+        // POST "/info/{resourceId}"
+
+        ObjectMapper objectMapper = new ObjectMapper();
         URI targetUri = null;
         try {
-            targetUri = new URL(ENDPOINT, "/info/" + resourceId.toString()).toURI();
+            targetUri = new URL(this.ENDPOINT, "/info/" + resourceId.toString()).toURI();
         } catch (MalformedURLException e) {
-            throw new Error(ERROR_MSG_URL_ERROR + ENDPOINT + "/info/" + resourceId.toString() + " [MalformedURLException]");
+            throw new Error(ERROR_MSG_URL_ERROR + this.ENDPOINT + "/info/" + resourceId.toString() + " [MalformedURLException]");
         } catch (URISyntaxException e) {
-            throw new Error(ERROR_MSG_URL_ERROR + ENDPOINT + "/info/" + resourceId.toString() + " [URISyntaxException]");
+            throw new Error(ERROR_MSG_URL_ERROR + this.ENDPOINT + "/info/" + resourceId.toString() + " [URISyntaxException]");
+        }
+
+        // build the request
+        String qrCredentials = null;
+        try {
+            qrCredentials = objectMapper.writeValueAsString(credentialsQueryRequest);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
         }
         HttpRequest requestBuilder = HttpRequest.newBuilder()
+                .header("Content-Type", "application/json")
+                .header("AUTHORIZATION", "Bearer "+this.TOKEN)
                 .uri(targetUri)
-                .GET()
+                .POST(BodyPublishers.ofString(qrCredentials))
                 .build();
 
+        // send request and process response
         ResourceInfo response = null;
+        HttpResponse<String> httpResponse = null;
         try {
-            response = (ResourceInfo) this.httpClient.send(requestBuilder, HttpResponse.BodyHandlers.ofString());
+            httpResponse = this.httpClient.send(requestBuilder, HttpResponse.BodyHandlers.ofString());
+            response = objectMapper.readValue(httpResponse.toString(), ResourceInfo.class);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -109,8 +127,40 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
     }
 
     @Override
-    public List<Resource> resources() {
-        return null;
+    public List<UUID> resources() {
+        // GET "/info/resources"
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        URI targetUri = null;
+        try {
+            targetUri = new URL(this.ENDPOINT, "/resources").toURI();
+        } catch (MalformedURLException e) {
+            throw new Error(ERROR_MSG_URL_ERROR + ENDPOINT + "/resources [MalformedURLException]");
+        } catch (URISyntaxException e) {
+            throw new Error(ERROR_MSG_URL_ERROR + ENDPOINT + "/resources [URISyntaxException]");
+        }
+
+        // build the request
+        String qrCredentials = null;
+        HttpRequest requestBuilder = HttpRequest.newBuilder()
+                .header("Content-Type", "application/json")
+                .header("AUTHORIZATION", "Bearer "+this.TOKEN)
+                .uri(targetUri)
+                .GET()
+                .build();
+
+        // send request and process response
+        List<UUID> ret = null;
+        try {
+            HttpResponse<String> httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofString());
+            ret = objectMapper.readValue(httpResponse.toString(), new TypeReference<List<UUID>>(){});
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        // process the returned result to be a ResourceInfo object?
+        return ret;
     }
 
     @Override

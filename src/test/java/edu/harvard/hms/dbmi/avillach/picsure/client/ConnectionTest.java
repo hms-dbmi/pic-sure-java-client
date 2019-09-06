@@ -9,25 +9,6 @@ import java.util.UUID;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-/*
-class MockAdapter extends BasePicSureAdapter {
-
-    public MockAdapter(Connection connection) {
-        super(connection);
-    }
-
-    public void help() {}
-    public void version() {}
-    public void list() {}
-    public BasePicSureResourceConnection useResource(UUID resource_uuid) {
-        return null;
-    }
-    public IPicSureConnectionAPI getApiObj() {
-        return this.refApiObj;
-    }
-}
-*/
-
 public class ConnectionTest {
     private URL anyUrl;
 

@@ -22,7 +22,7 @@ public interface IPicSureConnectionAPI {
     public ResourceInfo resourceInfo(UUID resourceId, QueryRequest credentialsQueryRequest);
 
     // @Path("/info/resources")
-    public List<Resource> resources();
+    public List<UUID> resources();
 
     // @Path("/search/{resourceId}")
     public SearchResults search(UUID resourceId, QueryRequest searchQueryRequest);

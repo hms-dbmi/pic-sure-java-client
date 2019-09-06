@@ -7,16 +7,35 @@ public class Client {
     protected URL endpointURL = null;
     protected String token = null;
 
-    public static void version() {}        // for jShell
-    public static void help() {}           // for jShell
+
+    /**
+     * Class function for use in jShell to get version of HPDS adapter library.
+     * @since   1.0
+     */
+    public static void version() {
+        // for jShell
+    }
+
+
+    /**
+     * Class function for use in jShell to print help instructions on the screen for this object's use.
+     * @since   1.0
+     */
+    public static void help() {
+        // for jShell
+    }
 
 
     public static Connection connect(URL url, String token) {
         return new Connection(url, token, false);
     }
+
+
     public static Connection connect(URL url, String token, Boolean allowSelfSignedSSL) {
         return new Connection(url, token, allowSelfSignedSSL);
     }
+
+
     public static Connection connect(String url, String token) {
         URL urlObj = null;
         try {
@@ -27,6 +46,8 @@ public class Client {
             return null;
         }
     }
+
+
     public static Connection connect(String url, String token, Boolean allowSelfSignedSSL) {
         URL urlObj = null;
         try {
