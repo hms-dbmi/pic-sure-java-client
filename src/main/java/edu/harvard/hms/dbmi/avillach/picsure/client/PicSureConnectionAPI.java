@@ -90,11 +90,9 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
         ObjectMapper objectMapper = new ObjectMapper();
         URI targetUri = null;
         try {
-            targetUri = new URL(this.ENDPOINT, "/info/" + resourceId.toString()).toURI();
-        } catch (MalformedURLException e) {
-            throw new Error(ERROR_MSG_URL_ERROR + this.ENDPOINT + "/info/" + resourceId.toString() + " [MalformedURLException]");
+            targetUri = this.ENDPOINT.toURI().resolve("info/" + resourceId.toString().replace("-", ""));
         } catch (URISyntaxException e) {
-            throw new Error(ERROR_MSG_URL_ERROR + this.ENDPOINT + "/info/" + resourceId.toString() + " [URISyntaxException]");
+            throw new Error(ERROR_MSG_URL_ERROR + this.ENDPOINT + "/info/" + resourceId.toString().replace("-", "") + " [URISyntaxException]");
         }
 
         // build the request
@@ -133,9 +131,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
         ObjectMapper objectMapper = new ObjectMapper();
         URI targetUri = null;
         try {
-            targetUri = new URL(this.ENDPOINT, "/resources").toURI();
-        } catch (MalformedURLException e) {
-            throw new Error(ERROR_MSG_URL_ERROR + ENDPOINT + "/resources [MalformedURLException]");
+            targetUri = this.ENDPOINT.toURI().resolve("info/resources");
         } catch (URISyntaxException e) {
             throw new Error(ERROR_MSG_URL_ERROR + ENDPOINT + "/resources [URISyntaxException]");
         }
@@ -152,8 +148,8 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
         // send request and process response
         List<UUID> ret = null;
         try {
-            HttpResponse<String> httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofString());
-            ret = objectMapper.readValue(httpResponse.toString(), new TypeReference<List<UUID>>(){});
+            HttpResponse httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofString());
+            ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<List<UUID>>(){});
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

@@ -1,13 +1,11 @@
 package edu.harvard.hms.dbmi.avillach.picsure.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class ClientTest {
 
@@ -31,12 +29,12 @@ public class ClientTest {
         }
         Object conn = testClient.connect(anyUrl, "any.token.value", false);
         Class[] interfaceList = conn.getClass().getInterfaces();
+
         for (Class iface : interfaceList) {
             if (iface.getName().equals("edu.harvard.hms.dbmi.avillach.picsure.client.IPicSureConnection")) return;
         }
         fail("returned connection does not implement IPicSureConnection class!");
     }
-
 
 
 }
