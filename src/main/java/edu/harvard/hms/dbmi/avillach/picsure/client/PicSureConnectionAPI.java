@@ -89,10 +89,11 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
 
         ObjectMapper objectMapper = new ObjectMapper();
         URI targetUri = null;
+        String path = "info/" + resourceId.toString().replace("-", "");
         try {
-            targetUri = this.ENDPOINT.toURI().resolve("info/" + resourceId.toString().replace("-", ""));
+            targetUri = this.ENDPOINT.toURI().resolve(path);
         } catch (URISyntaxException e) {
-            throw new Error(ERROR_MSG_URL_ERROR + this.ENDPOINT + "/info/" + resourceId.toString().replace("-", "") + " [URISyntaxException]");
+            throw new Error(ERROR_MSG_URL_ERROR + this.ENDPOINT + path + " [URISyntaxException]");
         }
 
         // build the request
@@ -111,10 +112,10 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
 
         // send request and process response
         ResourceInfo response = null;
-        HttpResponse<String> httpResponse = null;
+        HttpResponse httpResponse = null;
         try {
             httpResponse = this.httpClient.send(requestBuilder, HttpResponse.BodyHandlers.ofString());
-            response = objectMapper.readValue(httpResponse.toString(), ResourceInfo.class);
+            response = objectMapper.readValue(httpResponse.body().toString(), ResourceInfo.class);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -130,10 +131,11 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
 
         ObjectMapper objectMapper = new ObjectMapper();
         URI targetUri = null;
+        String path = "info/resources";
         try {
-            targetUri = this.ENDPOINT.toURI().resolve("info/resources");
+            targetUri = this.ENDPOINT.toURI().resolve(path);
         } catch (URISyntaxException e) {
-            throw new Error(ERROR_MSG_URL_ERROR + ENDPOINT + "/resources [URISyntaxException]");
+            throw new Error(ERROR_MSG_URL_ERROR + this.ENDPOINT + path + " [URISyntaxException]");
         }
 
         // build the request
@@ -161,7 +163,44 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
 
     @Override
     public SearchResults search(UUID resourceId, QueryRequest searchQueryRequest) {
+        // @POST   @Path("/search/{resourceId}")
+        //  OutputStream search(UUID resource_uuid, Object query);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        URI targetUri = null;
+        String path = "search/" + resourceId.toString().replace("-", "");
+        try {
+            targetUri = this.ENDPOINT.toURI().resolve(path);
+        } catch (URISyntaxException e) {
+            throw new Error(ERROR_MSG_URL_ERROR + ENDPOINT + path + " [URISyntaxException]");
+        }
+
+        // build the request
+        String qrCredentials = null;
+        String body = "";
+        try {
+            body = objectMapper.writeValueAsString(searchQueryRequest);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        HttpRequest requestBuilder = HttpRequest.newBuilder()
+                .header("Content-Type", "application/json")
+                .header("AUTHORIZATION", "Bearer "+this.TOKEN)
+                .uri(targetUri)
+                .POST(BodyPublishers.ofString(body))
+                .build();
+
+
+        // send request and process response
         SearchResults ret = new SearchResults();
+        try {
+            HttpResponse httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofString());
+            ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<SearchResults>(){});
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return ret;
     }
 

@@ -1,8 +1,11 @@
 package edu.harvard.hms.dbmi.avillach.picsure.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import edu.harvard.dbmi.avillach.domain.QueryRequest;
 import edu.harvard.dbmi.avillach.domain.ResourceInfo;
+import edu.harvard.dbmi.avillach.domain.SearchResults;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -91,7 +94,17 @@ public class PicSureConnectionAPITest {
 
 
         UUID resourceID = UUID.randomUUID();
+        ObjectMapper objectMapper = new ObjectMapper();
         QueryRequest queryRequest = new QueryRequest();
+        ResourceInfo resourceInfo = new ResourceInfo();
+        resourceInfo.setId(resourceID);
+        resourceInfo.setName("TESTING_NAME");
+        String body = "BAD RESULT";
+        try {
+            body = objectMapper.writeValueAsString(resourceInfo);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         // setup wiremock for the request
         stubFor(post(urlEqualTo("/PIC-SURE/info/" + resourceID.toString().replace("-", "")))
@@ -99,13 +112,16 @@ public class PicSureConnectionAPITest {
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withHeader("AUTHORIZATION", "Bearer " + tokenValue)
-                        .withBody("")
+                        .withBody(body)
                 )
         );
 
         // send the request
         testApiObj = new PicSureConnectionAPI(urlEndpoint, tokenValue, false);
         ResourceInfo results = testApiObj.resourceInfo(resourceID, queryRequest);
+
+        assertEquals(resourceInfo.getId(), results.getId());
+        assertEquals(resourceInfo.getName(), results.getName());
 
         // verify that wiremock request was correct
         verify(postRequestedFor(urlPathMatching("/PIC-SURE/info/" + resourceID.toString().replace("-", "")))
@@ -120,24 +136,38 @@ public class PicSureConnectionAPITest {
         //  OutputStream search(UUID resource_uuid, Object query);
 
         UUID resourceID = UUID.randomUUID();
+        String path = "search/" + resourceID.toString().replace("-", "");
         QueryRequest queryRequest = new QueryRequest();
+        queryRequest.setQuery("{\"test\":\"search query\"}");
+        String body = "BAD RESULT";
+        ObjectMapper objectMapper = new ObjectMapper();
 
+        SearchResults httpReturn = new SearchResults();
+        httpReturn.setResults("GOOD RESULT");
+        try {
+            body = objectMapper.writeValueAsString(httpReturn);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
         // setup wiremock for the request
-        stubFor(post(urlEqualTo("/PIC-SURE/search/" + resourceID.toString().replace("-", "")))
+        stubFor(post(urlEqualTo("/PIC-SURE/" + path))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withHeader("AUTHORIZATION", "Bearer " + tokenValue)
-                        .withBody("")
+                        .withBody(body)
                 )
         );
 
+
         // send the request
         testApiObj = new PicSureConnectionAPI(urlEndpoint, tokenValue, false);
-        Object results = testApiObj.search(resourceID, queryRequest);
+        SearchResults results = testApiObj.search(resourceID, queryRequest);
+
+        assertEquals("The query results do not match", httpReturn.getResults(), results.getResults());
 
         // verify that wiremock request was correct
-        verify(postRequestedFor(urlPathMatching("/PIC-SURE/search/" + resourceID.toString().replace("-", "")))
+        verify(postRequestedFor(urlPathMatching("/PIC-SURE/" + path))
                 .withHeader("Content-Type", matching("application/json"))
                 .withHeader("AUTHORIZATION", matching("Bearer " + tokenValue))
         );
