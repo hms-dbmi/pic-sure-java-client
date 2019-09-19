@@ -8,6 +8,7 @@ import edu.harvard.dbmi.avillach.domain.QueryRequest;
 import edu.harvard.dbmi.avillach.domain.QueryStatus;
 import edu.harvard.dbmi.avillach.domain.ResourceInfo;
 import edu.harvard.dbmi.avillach.domain.SearchResults;
+import edu.harvard.dbmi.avillach.util.PicSureStatus;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -85,7 +86,8 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
 
     @Override
     public ResourceInfo resourceInfo(UUID resourceId, QueryRequest credentialsQueryRequest) {
-        // POST "/info/{resourceId}"
+        // @POST   @Path("/info/{resourceId}")
+        //  OutputStream info(UUID resource_uuid);
 
         ObjectMapper objectMapper = new ObjectMapper();
         URI targetUri = null;
@@ -127,7 +129,8 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
 
     @Override
     public List<UUID> resources() {
-        // GET "/info/resources"
+        // @GET    @Path("/info/resources")
+        //  List<UUID> resources();
 
         ObjectMapper objectMapper = new ObjectMapper();
         URI targetUri = null;
@@ -206,28 +209,208 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
 
     @Override
     public QueryStatus query(QueryRequest dataQueryRequest) {
+        // @POST   @Path("/query")
+        //  QueryStatus query(UUID resource_uuid, Object query);
 
-        return null;
+        ObjectMapper objectMapper = new ObjectMapper();
+        URI targetUri = null;
+        String path = "query/";
+        try {
+            targetUri = this.ENDPOINT.toURI().resolve(path);
+        } catch (URISyntaxException e) {
+            throw new Error(ERROR_MSG_URL_ERROR + ENDPOINT + path + " [URISyntaxException]");
+        }
+
+        // build the request
+        String body = "";
+        QueryStatus queryStatus = new QueryStatus();
+        queryStatus.setStatus(PicSureStatus.PENDING);
+        try {
+            body = objectMapper.writeValueAsString(dataQueryRequest);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        HttpRequest requestBuilder = HttpRequest.newBuilder()
+                .header("Content-Type", "application/json")
+                .header("AUTHORIZATION", "Bearer "+this.TOKEN)
+                .uri(targetUri)
+                .POST(BodyPublishers.ofString(body))
+                .build();
+
+
+        // send request and process response
+        QueryStatus ret = new QueryStatus();
+        try {
+            HttpResponse httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofString());
+            ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<QueryStatus>(){});
+        } catch (IOException e) {
+            e.printStackTrace();
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return ret;
     }
 
     @Override
     public QueryStatus queryStatus(UUID queryId, QueryRequest credentialsQueryRequest) {
-        return null;
+        // @POST   @Path("/query/{queryId}/status")
+        //  QueryStatus queryStatus(UUID resource_uuid, UUID query_uuid);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        URI targetUri = null;
+        String path = "query/" + queryId.toString().replace("-", "") + "/status";
+        try {
+            targetUri = this.ENDPOINT.toURI().resolve(path);
+        } catch (URISyntaxException e) {
+            throw new Error(ERROR_MSG_URL_ERROR + ENDPOINT + path + " [URISyntaxException]");
+        }
+
+        // build the request
+        String body = "";
+        try {
+            body = objectMapper.writeValueAsString(credentialsQueryRequest);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        HttpRequest requestBuilder = HttpRequest.newBuilder()
+                .header("Content-Type", "application/json")
+                .header("AUTHORIZATION", "Bearer "+this.TOKEN)
+                .uri(targetUri)
+                .POST(BodyPublishers.ofString(body))
+                .build();
+
+        // send request and process response
+        QueryStatus ret = new QueryStatus();
+        try {
+            HttpResponse httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofString());
+            ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<QueryStatus>(){});
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return ret;
     }
 
     @Override
     public InputStream queryResult(UUID queryId, QueryRequest credentialsQueryRequest) {
-        return null;
+        // @POST    @Path("/query/{queryId}/result")
+        //  InputStream queryResult(UUID queryId, QueryRequest credentialsQueryRequest);
+
+        URI targetUri = null;
+        String path = "query/" + queryId.toString().replace("-","")+"/result";
+        try {
+            targetUri = this.ENDPOINT.toURI().resolve(path);
+        } catch (URISyntaxException e) {
+            throw new Error(ERROR_MSG_URL_ERROR + ENDPOINT + path + " [URISyntaxException]");
+        }
+
+        // build the request
+        ObjectMapper objectMapper = new ObjectMapper();
+        String body = "";
+        try {
+            body = objectMapper.writeValueAsString(credentialsQueryRequest);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        HttpRequest requestBuilder = HttpRequest.newBuilder()
+                .header("Content-Type", "application/json")
+                .header("AUTHORIZATION", "Bearer "+this.TOKEN)
+                .uri(targetUri)
+                .POST(BodyPublishers.ofString(body))
+                .build();
+
+        // send request and process response
+        HttpResponse httpResponse = null;
+        InputStream ret = null;
+        try {
+            httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofInputStream());
+            ret = (InputStream) httpResponse.body();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return ret;
     }
 
     @Override
     public InputStream querySync(QueryRequest credentialsQueryRequest) {
-        return null;
+        // @POST    @Path("/query/sync")
+        //  InputStream querySync(QueryRequest credentialsQueryRequest);
+        ObjectMapper objectMapper = new ObjectMapper();
+        URI targetUri = null;
+        String path = "query/sync";
+        try {
+            targetUri = this.ENDPOINT.toURI().resolve(path);
+        } catch (URISyntaxException e) {
+            throw new Error(ERROR_MSG_URL_ERROR + ENDPOINT + path + " [URISyntaxException]");
+        }
+
+        // build the request
+        String body = "";
+        QueryStatus queryStatus = new QueryStatus();
+        queryStatus.setStatus(PicSureStatus.PENDING);
+        try {
+            body = objectMapper.writeValueAsString(credentialsQueryRequest);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        HttpRequest requestBuilder = HttpRequest.newBuilder()
+                .header("Content-Type", "application/json")
+                .header("AUTHORIZATION", "Bearer "+this.TOKEN)
+                .uri(targetUri)
+                .POST(BodyPublishers.ofString(body))
+                .build();
+
+        // send request and process response
+        HttpResponse httpResponse = null;
+        InputStream ret = null;
+        try {
+            httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofInputStream());
+            ret = (InputStream) httpResponse.body();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return ret;
     }
 
     @Override
     public QueryStatus queryMetdata(UUID queryId) {
-        return null;
+        // @POST   @Path("/query/{queryId}/status")
+        //  QueryStatus queryStatus(UUID resource_uuid, UUID query_uuid);
+
+        URI targetUri = null;
+        String path = "query/" + queryId.toString().replace("-", "") + "/metadata";
+        try {
+            targetUri = this.ENDPOINT.toURI().resolve(path);
+        } catch (URISyntaxException e) {
+            throw new Error(ERROR_MSG_URL_ERROR + ENDPOINT + path + " [URISyntaxException]");
+        }
+
+        // build the request
+        HttpRequest requestBuilder = HttpRequest.newBuilder()
+                .header("Content-Type", "application/json")
+                .header("AUTHORIZATION", "Bearer "+this.TOKEN)
+                .uri(targetUri)
+                .GET()
+                .build();
+
+        // send request and process response
+        ObjectMapper objectMapper = new ObjectMapper();
+        QueryStatus ret = new QueryStatus();
+        try {
+            HttpResponse httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofString());
+            ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<QueryStatus>(){});
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return ret;
     }
 
 }

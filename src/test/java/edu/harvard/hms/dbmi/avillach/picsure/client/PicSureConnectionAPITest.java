@@ -4,14 +4,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import edu.harvard.dbmi.avillach.domain.QueryRequest;
+import edu.harvard.dbmi.avillach.domain.QueryStatus;
 import edu.harvard.dbmi.avillach.domain.ResourceInfo;
 import edu.harvard.dbmi.avillach.domain.SearchResults;
+import edu.harvard.dbmi.avillach.util.PicSureStatus;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
 import javax.management.Query;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -22,17 +24,17 @@ import static org.junit.Assert.*;
 
 
 public class PicSureConnectionAPITest {
-    public final int WireMockPort = 8089;
-    public URL urlEndpoint;
-    public String tokenValue;
-    public IPicSureConnectionAPI testApiObj;
+    private final int WireMockPort = 8089;
+    private URL urlEndpoint;
+    private String tokenValue;
+    private UUID resourceUUID;
+    private IPicSureConnectionAPI testApiObj;
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(WireMockPort);
 
     @Before
     public void setup() {
-        tokenValue = "any.token.value";
         try {
             urlEndpoint = new URL("http://localhost:" + Integer.toString(WireMockPort) + "/PIC-SURE/");
         } catch (MalformedURLException e) {
@@ -40,6 +42,8 @@ public class PicSureConnectionAPITest {
             return;
         }
 
+        tokenValue = "any.token.value";
+        resourceUUID = UUID.randomUUID();
     }
 
     @Test
@@ -92,12 +96,10 @@ public class PicSureConnectionAPITest {
         // @POST   @Path("/info/{resourceId}")
         //  OutputStream info(UUID resource_uuid);
 
-
-        UUID resourceID = UUID.randomUUID();
         ObjectMapper objectMapper = new ObjectMapper();
         QueryRequest queryRequest = new QueryRequest();
         ResourceInfo resourceInfo = new ResourceInfo();
-        resourceInfo.setId(resourceID);
+        resourceInfo.setId(resourceUUID);
         resourceInfo.setName("TESTING_NAME");
         String body = "BAD RESULT";
         try {
@@ -107,7 +109,7 @@ public class PicSureConnectionAPITest {
         }
 
         // setup wiremock for the request
-        stubFor(post(urlEqualTo("/PIC-SURE/info/" + resourceID.toString().replace("-", "")))
+        stubFor(post(urlEqualTo("/PIC-SURE/info/" + resourceUUID.toString().replace("-", "")))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -118,13 +120,13 @@ public class PicSureConnectionAPITest {
 
         // send the request
         testApiObj = new PicSureConnectionAPI(urlEndpoint, tokenValue, false);
-        ResourceInfo results = testApiObj.resourceInfo(resourceID, queryRequest);
+        ResourceInfo results = testApiObj.resourceInfo(resourceUUID, queryRequest);
 
         assertEquals(resourceInfo.getId(), results.getId());
         assertEquals(resourceInfo.getName(), results.getName());
 
         // verify that wiremock request was correct
-        verify(postRequestedFor(urlPathMatching("/PIC-SURE/info/" + resourceID.toString().replace("-", "")))
+        verify(postRequestedFor(urlPathMatching("/PIC-SURE/info/" + resourceUUID.toString().replace("-", "")))
                 .withHeader("Content-Type", matching("application/json"))
                 .withHeader("AUTHORIZATION", matching("Bearer " + tokenValue))
         );
@@ -135,8 +137,7 @@ public class PicSureConnectionAPITest {
         // @POST   @Path("/search/{resourceId}")
         //  OutputStream search(UUID resource_uuid, Object query);
 
-        UUID resourceID = UUID.randomUUID();
-        String path = "search/" + resourceID.toString().replace("-", "");
+        String path = "search/" + resourceUUID.toString().replace("-", "");
         QueryRequest queryRequest = new QueryRequest();
         queryRequest.setQuery("{\"test\":\"search query\"}");
         String body = "BAD RESULT";
@@ -144,6 +145,7 @@ public class PicSureConnectionAPITest {
 
         SearchResults httpReturn = new SearchResults();
         httpReturn.setResults("GOOD RESULT");
+
         try {
             body = objectMapper.writeValueAsString(httpReturn);
         } catch (JsonProcessingException e) {
@@ -159,10 +161,9 @@ public class PicSureConnectionAPITest {
                 )
         );
 
-
         // send the request
         testApiObj = new PicSureConnectionAPI(urlEndpoint, tokenValue, false);
-        SearchResults results = testApiObj.search(resourceID, queryRequest);
+        SearchResults results = testApiObj.search(resourceUUID, queryRequest);
 
         assertEquals("The query results do not match", httpReturn.getResults(), results.getResults());
 
@@ -178,15 +179,35 @@ public class PicSureConnectionAPITest {
         // @POST   @Path("/query")
         //  UUID query(UUID resource_uuid, Object query);
 
+        UUID queryID = UUID.randomUUID();
         QueryRequest queryRequest = new QueryRequest();
+        queryRequest.setQuery("{\"test\":\"search query\"}");
+        queryRequest.setResourceUUID(resourceUUID);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        QueryStatus queryStatus = new QueryStatus();
+        queryStatus.setDuration(1000);
+        queryStatus.setStatus(PicSureStatus.AVAILABLE);
+        queryStatus.setResourceID(resourceUUID );
+        queryStatus.setPicsureResultId(queryID);
+        queryStatus.setSizeInBytes(2000);
+        queryStatus.setResourceStatus("OK");
+        queryStatus.setResultMetadata("SOME_METADATA".getBytes());
+        // queryStatus.setResourceResultId(); // generated by IRCT
+        String body = "BAD RESULT";
+        try {
+            body = objectMapper.writeValueAsString(queryStatus);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         // setup wiremock for the request
-        stubFor(post(urlEqualTo("/PIC-SURE/query"))
+        stubFor(post(urlEqualTo("/PIC-SURE/query/"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withHeader("AUTHORIZATION", "Bearer " + tokenValue)
-                        .withBody("")
+                        .withBody(body)
                 )
         );
 
@@ -204,10 +225,30 @@ public class PicSureConnectionAPITest {
     @Test
     public void testApiCall_QueryIdStatus() {
         // @POST   @Path("/query/{queryId}/status")
-        //  String queryStatus(UUID resource_uuid, UUID query_uuid);
+        //  QueryStatus queryStatus(UUID resource_uuid, UUID query_uuid);
 
         UUID queryID = UUID.randomUUID();
+        UUID resourceID = UUID.randomUUID();
         QueryRequest queryRequest = new QueryRequest();
+        queryRequest.setQuery("{\"test\":\"search query\"}");
+        queryRequest.setResourceUUID(resourceID);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        QueryStatus queryStatus = new QueryStatus();
+        queryStatus.setDuration(1000);
+        queryStatus.setStatus(PicSureStatus.AVAILABLE);
+        queryStatus.setResourceID(resourceID);
+        queryStatus.setPicsureResultId(queryID);
+        queryStatus.setSizeInBytes(2000);
+        queryStatus.setResourceStatus("OK");
+        queryStatus.setResultMetadata("SOME_METADATA".getBytes());
+        // queryStatus.setResourceResultId(); // generated by IRCT
+        String body = "BAD RESULT";
+        try {
+            body = objectMapper.writeValueAsString(queryStatus);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         // setup wiremock for the request
         stubFor(post(urlEqualTo("/PIC-SURE/query/" + queryID.toString().replace("-", "") + "/status"))
@@ -215,7 +256,7 @@ public class PicSureConnectionAPITest {
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withHeader("AUTHORIZATION", "Bearer " + tokenValue)
-                        .withBody("")
+                        .withBody(body)
                 )
         );
 
@@ -244,13 +285,13 @@ public class PicSureConnectionAPITest {
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withHeader("AUTHORIZATION", "Bearer " + tokenValue)
-                        .withBody("")
+                        .withBody("THIS\tIS\tSOMETHING\tIN\tCSV\tFORMAT")
                 )
         );
 
         // send the request
         testApiObj = new PicSureConnectionAPI(urlEndpoint, tokenValue, false);
-        Object results = testApiObj.queryResult(queryID, queryRequest);
+        InputStream results = testApiObj.queryResult(queryID, queryRequest);
 
         // verify that wiremock request was correct
         verify(postRequestedFor(urlPathMatching("/PIC-SURE/query/" + queryID.toString().replace("-", "") + "/result"))
@@ -267,13 +308,31 @@ public class PicSureConnectionAPITest {
         UUID queryID = UUID.randomUUID();
         QueryRequest queryRequest = new QueryRequest();
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        QueryStatus queryStatus = new QueryStatus();
+        queryStatus.setDuration(1000);
+        queryStatus.setStatus(PicSureStatus.AVAILABLE);
+        queryStatus.setResourceID(resourceUUID);
+        queryStatus.setPicsureResultId(queryID);
+        queryStatus.setSizeInBytes(2000);
+        queryStatus.setResourceStatus("OK");
+        queryStatus.setResultMetadata("SOME_METADATA".getBytes());
+        // queryStatus.setResourceResultId(); // generated by IRCT
+
+        String body = "BAD BODY";
+        try {
+            body = objectMapper.writeValueAsString(queryStatus);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
         // setup wiremock for the request
         stubFor(get(urlEqualTo("/PIC-SURE/query/" + queryID.toString().replace("-", "") + "/metadata"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withHeader("AUTHORIZATION", "Bearer " + tokenValue)
-                        .withBody("")
+                        .withBody(body)
                 )
         );
 
@@ -291,7 +350,7 @@ public class PicSureConnectionAPITest {
     @Test
     public void testApiCall_QuerySync() {
         // @POST   @Path("/query/sync")
-        //  OutputStream syncQuery(UUID resource_uuid, Object query);
+        //  InputStream syncQuery(UUID resource_uuid, Object query);
 
         QueryRequest queryRequest = new QueryRequest();
 
@@ -301,13 +360,13 @@ public class PicSureConnectionAPITest {
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withHeader("AUTHORIZATION", "Bearer " + tokenValue)
-                        .withBody("")
+                        .withBody("THIS\tIS\tSOMETHING\tIN\tCSV\tFORMAT")
                 )
         );
 
         // send the request
         testApiObj = new PicSureConnectionAPI(urlEndpoint, tokenValue, false);
-        Object results = testApiObj.querySync(queryRequest);
+        InputStream results = testApiObj.querySync(queryRequest);
 
         // verify that wiremock request was correct
         verify(postRequestedFor(urlPathMatching("/PIC-SURE/query/sync"))

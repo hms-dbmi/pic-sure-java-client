@@ -11,15 +11,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface IPicSureConnectionAPI {
-    //  List<UUID> resources();
-    //  OutputStream info(UUID resource_uuid);
-    //  OutputStream search(UUID resource_uuid, Object query);
-    //  UUID asynchQuery(UUID resource_uuid, Object query);
-    //  OutputStream syncQuery(UUID resource_uuid, Object query);
-    //  String queryStatus(UUID resource_uuid, UUID query_uuid);
-    //  OutputStream queryResults(UUID resource_uuid, UUID query_uuid);
-    //  QueryStatus queryMetadata(UUID queryId);
-
     // @Path("/info/{resourceId}")
     public ResourceInfo resourceInfo(UUID resourceId, QueryRequest credentialsQueryRequest);
 
