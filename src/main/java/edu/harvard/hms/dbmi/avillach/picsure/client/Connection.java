@@ -1,5 +1,9 @@
 package edu.harvard.hms.dbmi.avillach.picsure.client;
 
+import edu.harvard.hms.dbmi.avillach.picsure.client.api.IPicSureConnection;
+import edu.harvard.hms.dbmi.avillach.picsure.client.api.IPicSureConnectionAPI;
+
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +18,22 @@ public final class Connection implements IPicSureConnection {
 
     protected Connection(URL url, String token, boolean allowSelfSignedSSL) {
         // this is the final processing constructor
-        this.ENDPOINT = url;
+        URL tempEndpoint = null;
+        // make sure the endpoint ends with a "/"
+        if (url.getFile().endsWith("/")) {
+            tempEndpoint = url;
+        } else {
+            try {
+                tempEndpoint = new URL(url, url.getFile() + "/");
+            } catch (MalformedURLException e) {
+                // TODO: throw error
+                e.printStackTrace();
+            }
+        }
+        this.ENDPOINT = tempEndpoint;
         this.TOKEN = token;
         this.AllowSelfSigned = allowSelfSignedSSL;
+        this.singltonApiObj = new PicSureConnectionAPI(url, token, allowSelfSignedSSL);
     }
 
     public String getTOKEN() {
@@ -43,7 +60,10 @@ public final class Connection implements IPicSureConnection {
         return null;
     }               // for jShell
 
-    public List<UUID> list() { return new ArrayList<UUID>(); }
+    public List<UUID> list() {
+        return this.singltonApiObj.resources();
+//        return new ArrayList<UUID>();
+    }
 
     public String getInfo(String uuid) {
         return null;

@@ -1,4 +1,4 @@
-package edu.harvard.hms.dbmi.avillach.picsure.client;
+package edu.harvard.hms.dbmi.avillach.picsure.client.api;
 
 import java.util.UUID;
 

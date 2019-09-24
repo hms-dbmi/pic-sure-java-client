@@ -1,10 +1,9 @@
-package edu.harvard.hms.dbmi.avillach.picsure.client;
+package edu.harvard.hms.dbmi.avillach.picsure.client.api;
 
 import edu.harvard.dbmi.avillach.domain.QueryRequest;
 import edu.harvard.dbmi.avillach.domain.QueryStatus;
 import edu.harvard.dbmi.avillach.domain.ResourceInfo;
 import edu.harvard.dbmi.avillach.domain.SearchResults;
-import edu.harvard.dbmi.avillach.data.entity.Resource;
 
 import java.io.InputStream;
 import java.util.List;

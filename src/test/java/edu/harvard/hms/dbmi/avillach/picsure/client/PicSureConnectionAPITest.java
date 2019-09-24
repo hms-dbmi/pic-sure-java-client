@@ -8,11 +8,11 @@ import edu.harvard.dbmi.avillach.domain.QueryStatus;
 import edu.harvard.dbmi.avillach.domain.ResourceInfo;
 import edu.harvard.dbmi.avillach.domain.SearchResults;
 import edu.harvard.dbmi.avillach.util.PicSureStatus;
+import edu.harvard.hms.dbmi.avillach.picsure.client.api.IPicSureConnectionAPI;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import javax.management.Query;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;

@@ -31,7 +31,7 @@ public class ClientTest {
         Class[] interfaceList = conn.getClass().getInterfaces();
 
         for (Class iface : interfaceList) {
-            if (iface.getName().equals("edu.harvard.hms.dbmi.avillach.picsure.client.IPicSureConnection")) return;
+            if (iface.getName().equals("edu.harvard.hms.dbmi.avillach.picsure.client.api.IPicSureConnection")) return;
         }
         fail("returned connection does not implement IPicSureConnection class!");
     }

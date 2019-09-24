@@ -43,7 +43,7 @@ public class ConnectionTest {
         Object apiObj = connection.getApiObject();
         Class[] interfaceList = apiObj.getClass().getInterfaces();
         for (Class iface : interfaceList) {
-            if (iface.getName().equals("edu.harvard.hms.dbmi.avillach.picsure.client.IPicSureConnectionAPI")) return;
+            if (iface.getName().equals("edu.harvard.hms.dbmi.avillach.picsure.client.api.IPicSureConnectionAPI")) return;
         }
         fail("returned connection does not implement IPicSureConnection class!");
     }
