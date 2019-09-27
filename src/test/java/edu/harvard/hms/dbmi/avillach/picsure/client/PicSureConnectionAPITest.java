@@ -109,7 +109,7 @@ public class PicSureConnectionAPITest {
         }
 
         // setup wiremock for the request
-        stubFor(post(urlEqualTo("/PIC-SURE/info/" + resourceUUID.toString().replace("-", "")))
+        stubFor(post(urlEqualTo("/PIC-SURE/info/" + resourceUUID.toString()))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -126,7 +126,7 @@ public class PicSureConnectionAPITest {
         assertEquals(resourceInfo.getName(), results.getName());
 
         // verify that wiremock request was correct
-        verify(postRequestedFor(urlPathMatching("/PIC-SURE/info/" + resourceUUID.toString().replace("-", "")))
+        verify(postRequestedFor(urlPathMatching("/PIC-SURE/info/" + resourceUUID.toString()))
                 .withHeader("Content-Type", matching("application/json"))
                 .withHeader("AUTHORIZATION", matching("Bearer " + tokenValue))
         );
@@ -137,7 +137,7 @@ public class PicSureConnectionAPITest {
         // @POST   @Path("/search/{resourceId}")
         //  OutputStream search(UUID resource_uuid, Object query);
 
-        String path = "search/" + resourceUUID.toString().replace("-", "");
+        String path = "search/" + resourceUUID.toString();
         QueryRequest queryRequest = new QueryRequest();
         queryRequest.setQuery("{\"test\":\"search query\"}");
         String body = "BAD RESULT";
@@ -251,7 +251,7 @@ public class PicSureConnectionAPITest {
         }
 
         // setup wiremock for the request
-        stubFor(post(urlEqualTo("/PIC-SURE/query/" + queryID.toString().replace("-", "") + "/status"))
+        stubFor(post(urlEqualTo("/PIC-SURE/query/" + queryID.toString() + "/status"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -265,7 +265,7 @@ public class PicSureConnectionAPITest {
         Object results = testApiObj.queryStatus(queryID, queryRequest);
 
         // verify that wiremock request was correct
-        verify(postRequestedFor(urlPathMatching("/PIC-SURE/query/" + queryID.toString().replace("-", "") + "/status"))
+        verify(postRequestedFor(urlPathMatching("/PIC-SURE/query/" + queryID.toString() + "/status"))
                 .withHeader("Content-Type", matching("application/json"))
                 .withHeader("AUTHORIZATION", matching("Bearer " + tokenValue))
         );
@@ -280,7 +280,7 @@ public class PicSureConnectionAPITest {
         QueryRequest queryRequest = new QueryRequest();
 
         // setup wiremock for the request
-        stubFor(post(urlEqualTo("/PIC-SURE/query/" + queryID.toString().replace("-", "") + "/result"))
+        stubFor(post(urlEqualTo("/PIC-SURE/query/" + queryID.toString() + "/result"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -294,7 +294,7 @@ public class PicSureConnectionAPITest {
         InputStream results = testApiObj.queryResult(queryID, queryRequest);
 
         // verify that wiremock request was correct
-        verify(postRequestedFor(urlPathMatching("/PIC-SURE/query/" + queryID.toString().replace("-", "") + "/result"))
+        verify(postRequestedFor(urlPathMatching("/PIC-SURE/query/" + queryID.toString() + "/result"))
                 .withHeader("Content-Type", matching("application/json"))
                 .withHeader("AUTHORIZATION", matching("Bearer " + tokenValue))
         );
@@ -327,7 +327,7 @@ public class PicSureConnectionAPITest {
         }
 
         // setup wiremock for the request
-        stubFor(get(urlEqualTo("/PIC-SURE/query/" + queryID.toString().replace("-", "") + "/metadata"))
+        stubFor(get(urlEqualTo("/PIC-SURE/query/" + queryID.toString() + "/metadata"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -341,7 +341,7 @@ public class PicSureConnectionAPITest {
         Object results = testApiObj.queryMetdata(queryID);
 
         // verify that wiremock request was correct
-        verify(getRequestedFor(urlPathMatching("/PIC-SURE/query/" + queryID.toString().replace("-", "") + "/metadata"))
+        verify(getRequestedFor(urlPathMatching("/PIC-SURE/query/" + queryID.toString() + "/metadata"))
                 .withHeader("Content-Type", matching("application/json"))
                 .withHeader("AUTHORIZATION", matching("Bearer " + tokenValue))
         );

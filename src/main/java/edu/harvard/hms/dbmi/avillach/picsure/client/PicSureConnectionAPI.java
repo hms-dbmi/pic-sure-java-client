@@ -15,6 +15,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -51,7 +52,19 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
     private HttpClient httpClient;
 
     public PicSureConnectionAPI(URL url, String token, boolean allowSelfSignedSSL) {
-        this.ENDPOINT = url;
+        URL tempEndpoint = null;
+        // make sure the endpoint ends with a "/"
+        if (url.getFile().endsWith("/")) {
+            tempEndpoint = url;
+        } else {
+            try {
+                tempEndpoint = new URL(url, url.getFile() + "/");
+            } catch (MalformedURLException e) {
+                // TODO: throw error
+                e.printStackTrace();
+            }
+        }
+        this.ENDPOINT = tempEndpoint;
         this.TOKEN = token;
         this.allowSelfSigned = allowSelfSignedSSL;
 
@@ -88,7 +101,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
 
         ObjectMapper objectMapper = new ObjectMapper();
         URI targetUri = null;
-        String path = "info/" + resourceId.toString().replace("-", "");
+        String path = "info/" + resourceId.toString();
         try {
             targetUri = this.ENDPOINT.toURI().resolve(path);
         } catch (URISyntaxException e) {
@@ -168,7 +181,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
 
         ObjectMapper objectMapper = new ObjectMapper();
         URI targetUri = null;
-        String path = "search/" + resourceId.toString().replace("-", "");
+        String path = "search/" + resourceId.toString();
         try {
             targetUri = this.ENDPOINT.toURI().resolve(path);
         } catch (URISyntaxException e) {
@@ -256,7 +269,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
 
         ObjectMapper objectMapper = new ObjectMapper();
         URI targetUri = null;
-        String path = "query/" + queryId.toString().replace("-", "") + "/status";
+        String path = "query/" + queryId.toString() + "/status";
         try {
             targetUri = this.ENDPOINT.toURI().resolve(path);
         } catch (URISyntaxException e) {
@@ -296,7 +309,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
         //  InputStream queryResult(UUID queryId, QueryRequest credentialsQueryRequest);
 
         URI targetUri = null;
-        String path = "query/" + queryId.toString().replace("-","")+"/result";
+        String path = "query/" + queryId.toString()+"/result";
         try {
             targetUri = this.ENDPOINT.toURI().resolve(path);
         } catch (URISyntaxException e) {
@@ -381,7 +394,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
         //  QueryStatus queryStatus(UUID resource_uuid, UUID query_uuid);
 
         URI targetUri = null;
-        String path = "query/" + queryId.toString().replace("-", "") + "/metadata";
+        String path = "query/" + queryId.toString() + "/metadata";
         try {
             targetUri = this.ENDPOINT.toURI().resolve(path);
         } catch (URISyntaxException e) {

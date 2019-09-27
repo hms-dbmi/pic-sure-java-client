@@ -1,5 +1,7 @@
 package edu.harvard.hms.dbmi.avillach.picsure.client;
 
+import edu.harvard.dbmi.avillach.domain.QueryRequest;
+import edu.harvard.dbmi.avillach.domain.ResourceInfo;
 import edu.harvard.hms.dbmi.avillach.picsure.client.api.IPicSureConnection;
 import edu.harvard.hms.dbmi.avillach.picsure.client.api.IPicSureConnectionAPI;
 
@@ -52,27 +54,22 @@ public final class Connection implements IPicSureConnection {
         // for jShell
     }
 
-
-    public String about(String resourceId) {
+    public String about(String resourceId) {    // for jShell
         return null;
-    }     // for jShell
-    public String getResources() {
+    }
+    public String list() {                  // for jShell
         return null;
-    }               // for jShell
-
-    public List<UUID> list() {
-        return this.singltonApiObj.resources();
-//        return new ArrayList<UUID>();
     }
 
-    public String getInfo(String uuid) {
-        return null;
+    public List<UUID> getResources() {
+        return this.singltonApiObj.resources();
+    }
+
+    public ResourceInfo getResourceInfo(String uuid, QueryRequest qr) {
+        return this.singltonApiObj.resourceInfo(UUID.fromString(uuid), qr);
     }
 
     public IPicSureConnectionAPI getApiObject() {
-        if (singltonApiObj == null) {
-            singltonApiObj = new PicSureConnectionAPI(this.ENDPOINT, this.TOKEN, this.AllowSelfSigned);
-        }
-        return singltonApiObj;
+        return this.singltonApiObj;
     }
 }
