@@ -95,7 +95,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
 
 
     @Override
-    public ResourceInfo resourceInfo(UUID resourceId, QueryRequest credentialsQueryRequest) {
+    public ResourceInfo resourceInfo(UUID resourceId, QueryRequest credentialsQueryRequest) throws SecurityException {
         // @POST   @Path("/info/{resourceId}")
         //  OutputStream info(UUID resource_uuid);
 
@@ -127,7 +127,13 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
         HttpResponse httpResponse = null;
         try {
             httpResponse = this.httpClient.send(requestBuilder, HttpResponse.BodyHandlers.ofString());
-            response = objectMapper.readValue(httpResponse.body().toString(), ResourceInfo.class);
+            switch (httpResponse.statusCode()) {
+                case 200:
+                    response = objectMapper.readValue(httpResponse.body().toString(), ResourceInfo.class);
+                    break;
+                case 401:
+                    throw new SecurityException(httpResponse.body().toString());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -138,7 +144,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
     }
 
     @Override
-    public List<UUID> resources() {
+    public List<UUID> resources() throws SecurityException {
         // @GET    @Path("/info/resources")
         //  List<UUID> resources();
 
@@ -164,7 +170,13 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
         List<UUID> ret = null;
         try {
             HttpResponse httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofString());
-            ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<List<UUID>>(){});
+            switch (httpResponse.statusCode()) {
+                case 200:
+                    ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<List<UUID>>(){});
+                    break;
+                case 401:
+                    throw new SecurityException(httpResponse.body().toString());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -175,7 +187,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
     }
 
     @Override
-    public SearchResults search(UUID resourceId, QueryRequest searchQueryRequest) {
+    public SearchResults search(UUID resourceId, QueryRequest searchQueryRequest) throws SecurityException {
         // @POST   @Path("/search/{resourceId}")
         //  OutputStream search(UUID resource_uuid, Object query);
 
@@ -208,7 +220,13 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
         SearchResults ret = new SearchResults();
         try {
             HttpResponse httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofString());
-            ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<SearchResults>(){});
+            switch (httpResponse.statusCode()) {
+                case 200:
+                    ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<SearchResults>(){});
+                    break;
+                case 401:
+                    throw new SecurityException(httpResponse.body().toString());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -218,7 +236,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
     }
 
     @Override
-    public QueryStatus query(QueryRequest dataQueryRequest) {
+    public QueryStatus query(QueryRequest dataQueryRequest) throws SecurityException {
         // @POST   @Path("/query")
         //  QueryStatus query(UUID resource_uuid, Object query);
 
@@ -252,9 +270,14 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
         QueryStatus ret = new QueryStatus();
         try {
             HttpResponse httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofString());
-            ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<QueryStatus>(){});
+            switch (httpResponse.statusCode()) {
+                case 200:
+                    ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<QueryStatus>(){});
+                    break;
+                case 401:
+                    throw new SecurityException(httpResponse.body().toString());
+            }
         } catch (IOException e) {
-            e.printStackTrace();
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -263,7 +286,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
     }
 
     @Override
-    public QueryStatus queryStatus(UUID queryId, QueryRequest credentialsQueryRequest) {
+    public QueryStatus queryStatus(UUID queryId, QueryRequest credentialsQueryRequest) throws SecurityException {
         // @POST   @Path("/query/{queryId}/status")
         //  QueryStatus queryStatus(UUID resource_uuid, UUID query_uuid);
 
@@ -294,7 +317,13 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
         QueryStatus ret = new QueryStatus();
         try {
             HttpResponse httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofString());
-            ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<QueryStatus>(){});
+            switch (httpResponse.statusCode()) {
+                case 200:
+                    ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<QueryStatus>(){});
+                    break;
+                case 401:
+                    throw new SecurityException(httpResponse.body().toString());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -304,7 +333,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
     }
 
     @Override
-    public InputStream queryResult(UUID queryId, QueryRequest credentialsQueryRequest) {
+    public InputStream queryResult(UUID queryId, QueryRequest credentialsQueryRequest) throws SecurityException {
         // @POST    @Path("/query/{queryId}/result")
         //  InputStream queryResult(UUID queryId, QueryRequest credentialsQueryRequest);
 
@@ -336,7 +365,13 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
         InputStream ret = null;
         try {
             httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofInputStream());
-            ret = (InputStream) httpResponse.body();
+            switch (httpResponse.statusCode()) {
+                case 200:
+                    ret = (InputStream) httpResponse.body();
+                    break;
+                case 401:
+                    throw new SecurityException(httpResponse.body().toString());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -346,7 +381,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
     }
 
     @Override
-    public InputStream querySync(QueryRequest credentialsQueryRequest) {
+    public InputStream querySync(QueryRequest credentialsQueryRequest) throws SecurityException {
         // @POST    @Path("/query/sync")
         //  InputStream querySync(QueryRequest credentialsQueryRequest);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -379,7 +414,13 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
         InputStream ret = null;
         try {
             httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofInputStream());
-            ret = (InputStream) httpResponse.body();
+            switch (httpResponse.statusCode()) {
+                case 200:
+                    ret = (InputStream) httpResponse.body();
+                    break;
+                case 401:
+                    throw new SecurityException(httpResponse.body().toString());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -389,7 +430,7 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
     }
 
     @Override
-    public QueryStatus queryMetdata(UUID queryId) {
+    public QueryStatus queryMetdata(UUID queryId) throws SecurityException {
         // @POST   @Path("/query/{queryId}/status")
         //  QueryStatus queryStatus(UUID resource_uuid, UUID query_uuid);
 
@@ -414,7 +455,13 @@ public class PicSureConnectionAPI implements IPicSureConnectionAPI {
         QueryStatus ret = new QueryStatus();
         try {
             HttpResponse httpResponse = this.httpClient.send(requestBuilder, BodyHandlers.ofString());
-            ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<QueryStatus>(){});
+            switch (httpResponse.statusCode()) {
+                case 200:
+                    ret = objectMapper.readValue(httpResponse.body().toString(), new TypeReference<QueryStatus>(){});
+                    break;
+                case 401:
+                    throw new SecurityException(httpResponse.body().toString());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
