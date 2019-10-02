@@ -3,6 +3,15 @@ package edu.harvard.hms.dbmi.avillach.picsure.client.api;
 import java.net.URL;
 import java.util.UUID;
 
+/**
+ * BasePicSureResourceConnection is the core functionality which needs to
+ * implimented by a PIC-SURE Resource in its PicSureAdapter class.
+ * @author  Nick Benik
+ * @version %I%, %G%
+ * @since   1.0
+ * @see BasePicSureAdapter#useResource(IPicSureConnection, UUID)
+ */
+
 public abstract class BasePicSureResourceConnection {
     private final UUID RESOURCE_UUID;
     private final URL ENDPOINT_URL;
@@ -19,16 +28,28 @@ public abstract class BasePicSureResourceConnection {
         this.TOKEN = this.protectedConnectionObj.getTOKEN();
     }
 
-    /**
-     * Class function for use in jShell to print help instructions on the screen for this object's use.
-     * @since   1.0
-     */
-    public void help() {
-        // for jShell
+
+    public IPicSureConnection getConnection() {
+        return this.protectedConnectionObj;
     }
-    public IPicSureConnection getConnection() { return this.protectedConnectionObj; }
-    public IPicSureConnectionAPI getApiObject() { return this.protectedApiObj; }
-    public UUID getResourceUUID() { return this.RESOURCE_UUID; }
-    public URL getEndpointUrl() { return this.ENDPOINT_URL; }
-    public String getToken() { return this.TOKEN; }
+
+
+    public IPicSureConnectionAPI getApiObject() {
+        return this.protectedApiObj;
+    }
+
+
+    public UUID getResourceUUID() {
+        return this.RESOURCE_UUID;
+    }
+
+
+    public URL getEndpointUrl() {
+        return this.ENDPOINT_URL;
+    }
+
+
+    public String getToken() {
+        return this.TOKEN;
+    }
 }

@@ -29,7 +29,17 @@ import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
-
+/**
+ * PicSureConnectionAPI is the core functionality of this
+ * library and is used by all PIC-SURE Resource Adapter
+ * libraries' code to perform actions via the PIC-SURE
+ * Network's standard API calls.
+ * @author  Nick Benik
+ * @version %I%, %G%
+ * @since   1.0
+ * @see     edu.harvard.dbmi.avillach.PicsureRS
+ */
+@SuppressWarnings("JavadocReference")
 public class PicSureConnectionAPI implements IPicSureConnectionAPI {
 
     public static final String ERROR_MSG_URL_ERROR = "The specified URL has caused an error: ";

@@ -11,6 +11,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Connection class instances are used to connect to a PIC-SURE network.
+ * A Connection class also allows listing all PIC-SURE Resources that are
+ * hosted on the currently connected network and getting detail information
+ * about each of those resources.
+ * @author  Nick Benik
+ * @version %I%, %G%
+ * @since   1.0
+ */
 public final class Connection implements IPicSureConnection {
     public final URL ENDPOINT;
     public final String TOKEN;
@@ -44,21 +53,6 @@ public final class Connection implements IPicSureConnection {
 
     public URL getENDPOINT() {
         return this.ENDPOINT;
-    }
-
-    /**
-     * Class function for use in jShell to print help instructions on the screen for this object's use.
-     * @since   1.0
-     */
-    public void help() {
-        // for jShell
-    }
-
-    public String about(String resourceId) {    // for jShell
-        return null;
-    }
-    public String list() {                  // for jShell
-        return null;
     }
 
     public List<UUID> getResources() {

@@ -3,27 +3,16 @@ package edu.harvard.hms.dbmi.avillach.picsure.client;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ * The Client class is entry-point into accessing a
+ * PIC-SURE network and resources that are hosted on it.
+ * @author  Nick Benik
+ * @version %I%, %G%
+ * @since   1.0
+ */
 public class Client {
     protected URL endpointURL = null;
     protected String token = null;
-
-
-    /**
-     * Class function for use in jShell to get version of HPDS adapter library.
-     * @since   1.0
-     */
-    public static void version() {
-        // for jShell
-    }
-
-
-    /**
-     * Class function for use in jShell to print help instructions on the screen for this object's use.
-     * @since   1.0
-     */
-    public static void help() {
-        // for jShell
-    }
 
 
     public static Connection connect(URL url, String token) {
